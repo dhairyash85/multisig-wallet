@@ -30,7 +30,7 @@ const WalletPage = () => {
 
   const submitTransaction = async () => {
     try {
-      const requiredSignature = dummy[wallet]
+      const requiredSignature = dummy[wallet].requiredSignature
       console.log(requiredSignature)
       console.log(Number(requiredSignature))
       const res = await axios.post('/add-transaction', { amount: transaction.value, from: wallet, to: transaction.to, signature: [], requiredSignatures: Number(requiredSignature) })
