@@ -4,13 +4,15 @@ import { abi as multisigAbi, factoryAbi } from './constant';
 import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import WalletPage from './pages/WalletPage';
+import RiseLanding from './component/Home';
 function App() {
   return (
    
           <BrowserRouter>
             <Routes>
-              <Route path='/' element={<LandingPage/>}/>
+              <Route path='/' element={<RiseLanding/>}/>
               <Route path='/wallet/:wallet' element={<WalletPage/>}/>
+              <Route path='/wallet' element={<LandingPage/>}/>
             </Routes>          
           </BrowserRouter>
   )
