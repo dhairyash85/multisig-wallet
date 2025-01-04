@@ -1,20 +1,18 @@
 import React, { useState } from 'react';
-import { ethers } from 'ethers';
-import { abi as multisigAbi, factoryAbi } from './constant';
 import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import WalletPage from './pages/WalletPage';
-import RiseLanding from './component/Home';
+import { WalletProvider } from './Context/WalletContext';
 function App() {
   return (
-   
+    <WalletProvider>
           <BrowserRouter>
             <Routes>
-              <Route path='/' element={<RiseLanding/>}/>
               <Route path='/wallet/:wallet' element={<WalletPage/>}/>
-              <Route path='/wallet' element={<LandingPage/>}/>
+              <Route path='/' element={<LandingPage/>}/>
             </Routes>          
           </BrowserRouter>
+    </WalletProvider>
   )
 }
 

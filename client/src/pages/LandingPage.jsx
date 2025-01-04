@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { Link } from "react-router-dom";
-import { abi as multisigAbi, factoryAbi } from "../constant";
-import Nav from "../component/Nav";
+import { dummy } from "../constant";
 import { Plus } from "lucide-react";
+import { useWallet } from "../Context/WalletContext";
 
 const LandingPage = () => {
+  const {walletAddress, connectWallet}=useWallet()
   const [userWallets, setUserWallets] = useState([]);
-  const [currentAddress, setCurrentAddress] = useState(null);
+
   const [isCreating, setIsCreating] = useState(false);
   const [owners, setOwners] = useState([""]);
   const [requiredSignatures, setRequiredSignatures] = useState(1);
@@ -18,83 +19,32 @@ const LandingPage = () => {
     newOwners[index] = event.target.value;
     setOwners(newOwners);
   };
-
+  useEffect(()=>{
+    if(walletAddress){
+      setUserWallets(Object.keys(dummy))
+    }
+  }, [walletAddress])
   const addOwnerField = () => {
     setOwners([...owners, ""]);
   };
 
   const createWallet = async () => {
-    if (!currentAddress) {
+    if (!walletAddress) {
       alert("Connect your wallet first!");
       return;
     }
-
-    try {
-      setIsLoading(true);
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const factoryContract = new ethers.Contract(
-        "0x202D331055ed69b53d6B787b61E2Df244e2AF049",
-        factoryAbi,
-        signer
-      );
-
-      const initData = new ethers.Interface(multisigAbi).encodeFunctionData(
-        "initialize",
-        [owners, requiredSignatures]
-      );
-
-      const tx = await factoryContract.deployContract(initData, owners);
-      const receipt = await tx.wait();
-
-      alert("New wallet created");
-      setIsLoading(false);
-      setIsCreating(false);
-    } catch (error) {
-      console.error(error);
-      alert("Error creating wallet");
-      setIsLoading(false);
-    }
+    setUserWallets(prev=>[...prev, walletAddress])
   };
 
-  const connectWallet = async () => {
-    if (window.ethereum) {
-      try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
-        const address = await signer.getAddress();
-
-        setCurrentAddress(address);
-
-        const factoryContract = new ethers.Contract(
-          "0x202D331055ed69b53d6B787b61E2Df244e2AF049",
-          factoryAbi,
-          signer
-        );
-
-        const walletCount = await factoryContract.countDeployed(address);
-
-        if (walletCount > 0) {
-          const deployedContracts = await factoryContract.getWallets(address);
-          setUserWallets(deployedContracts);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    } else {
-      alert("Please install MetaMask!");
-    }
-  };
 
   return (
     <div>
-      <Nav />
       <div className="relative h-full min-h-[600px] bg-[#FF90F4] overflow-hidden rounded-[40px] mx-16  ">
         <div className="absolute inset-0 bg-gradient-to-br from-[#FF90F4] to-[#7FFFD4]">
           <div className="absolute inset-0 flex justify-center items-center">
             <div className="text-center">
               <h1 className="text-5xl font-bold">MultiSig Wallet</h1>
-              {!currentAddress ? (
+              {!walletAddress ? (
                 <button
                   className="bg-black text-white font-bold py-3 px-6 rounded-lg mt-4 hover:scale-105 transition-transform"
                   onClick={connectWallet}
