@@ -89,7 +89,7 @@ const LandingPage = () => {
   return (
     <div>
       <Nav />
-      <div className="relative h-full min-h-[600px] bg-[#FF90F4] overflow-hidden rounded-[40px] mx-16">
+      <div className="relative h-full min-h-[600px] bg-[#FF90F4] overflow-hidden rounded-[40px] mx-16  ">
         <div className="absolute inset-0 bg-gradient-to-br from-[#FF90F4] to-[#7FFFD4]">
           <div className="absolute inset-0 flex justify-center items-center">
             <div className="text-center">
@@ -175,11 +175,11 @@ const LandingPage = () => {
 
         <div className="mt-16 mx-32">
           {userWallets.length > 0 ? (
-            <div className=" flex gap-8 items-center text-center overflow-auto p-4">
+            <div className=" grid grid-cols-4 gap-6 items-center text-center overflow-auto p-4">
               {userWallets.map((walletAddress) => (
                 <div
                   key={walletAddress}
-                  className="bg-black shadow-lg rounded-lg p-6 mb-4 transition-all duration-300 transform hover:scale-105   hover:shadow-xl"
+                  className=" bg-black/85 border-2 border-black shadow-xl rounded-lg p-6 mb-4 transition-all duration-300 transform hover:scale-105    hover:shadow-xl"
                 >
                   <Link
                     to={`/wallet/${walletAddress}`}
