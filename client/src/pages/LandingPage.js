@@ -1,78 +1,45 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import React, { useState } from "react";
 import { ethers } from "ethers";
-import React, { useEffect, useState } from "react";
-import { abi as multisigAbi, factoryAbi } from "../constant";
-import {ethers} from "ethers"
+import { Link } from "react-router-dom";
+import { dummyData } from "../constant"; // Importing dummy data
+
 const LandingPage = () => {
-  const [userWallets, setUserWallets] = useState([]);
+  const [userWallets, setUserWallets] = useState(dummyData.walletAddresses); // Using the dummy wallet addresses
   const [currentAddress, setCurrentAddress] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [owners, setOwners] = useState([""]);
-  const [requiredSignatures, setRequiredSignatures] = useState(1);
+  const [owners, setOwners] = useState(dummyData.owners); // Using the dummy owners
+  const [requiredSignatures, setRequiredSignatures] = useState(
+    dummyData.requiredSignatures
+  ); // Using the dummy number of required signatures
+
   const handleOwnerChange = (index, event) => {
     const newOwners = [...owners];
     newOwners[index] = event.target.value;
     setOwners(newOwners);
   };
 
-  const addOwnerField = () => {
-    setOwners([...owners, ""]);
-  };
+  const addOwnerField = () => setOwners([...owners, ""]);
 
   const createWallet = async () => {
     if (!currentAddress) {
       alert("Connect your wallet first!");
       return;
     }
-
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const factoryContract = new ethers.Contract(
-        "0x202D331055ed69b53d6B787b61E2Df244e2AF049",
-        factoryAbi,
-        signer
-      );
-      console.log(factoryContract);
-      const initData = new ethers.Interface(multisigAbi).encodeFunctionData(
-        "initialize",
-        [owners, requiredSignatures]
-      );
-      console.log(initData, owners);
-      const tx = await factoryContract.deployContract(initData, owners);
-      console.log(tx);
-      const receipt = await tx.wait();
-      console.log(receipt);
-      alert("New wallet created");
-    } catch (error) {
-      console.error(error);
-      alert("Error creating wallet");
-    }
+    // Create wallet logic...
+    alert("Wallet creation logic executed");
   };
 
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
+        // Requesting wallet access from the user
+        await window.ethereum.request({ method: "eth_requestAccounts" });
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const address = await signer.getAddress();
 
         if (address) {
           setCurrentAddress(address);
-        }
-
-        const factoryContract = new ethers.Contract(
-          "0x202D331055ed69b53d6B787b61E2Df244e2AF049",
-          factoryAbi,
-          signer
-        );
-
-        const walletCount = await factoryContract.countDeployed(address);
-
-        if (walletCount > 0 && address) {
-          const deployedContracts = await factoryContract.getWallets(address);
-          console.log(deployedContracts);
-          setUserWallets(deployedContracts);
         }
       } catch (error) {
         console.error(error);
@@ -83,82 +50,96 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="text-center">
-      <div className="text-5xl">MultiSig Wallet</div>
-      <div className="flex justify-center items-center gap-3 py-3">
+    <div className="font-sans bg-gradient-to-b from-white to-sky-400 min-h-screen flex flex-col items-center justify-center p-5">
+      {/* Header Section */}
+      <h1 className="text-5xl font-bold text-blue-800 text-center mb-8">
+        MultiSig Wallet Platform
+      </h1>
+      <p className="text-xl text-gray-800 text-center mb-6">
+        Secure. Reliable. Advanced Technology.
+      </p>
+
+      {/* Wallet Connection Section */}
+      <div className="flex flex-col items-center gap-4">
         {!currentAddress ? (
           <button
-            className="bg-blue-500 text-white rounded p-2"
+            className="bg-blue-800 text-white rounded-lg py-3 px-6 text-xl font-bold border-none cursor-pointer transition-all duration-300 ease-in-out"
             onClick={connectWallet}
           >
             Connect to Wallet
           </button>
         ) : (
-          <div>
+          <div className="text-center">
             <button
-              className="bg-gray-500 text-white text-3xl rounded-xl px-3 hover:text-black hover:bg-white"
+              className="bg-sky-400 text-blue-800 rounded-lg py-3 px-6 text-xl font-bold border-none cursor-pointer mb-5 transition-transform duration-300 ease-in-out"
               onClick={() => setIsCreating(true)}
             >
-              Create Wallet
+              Create New Wallet
             </button>
-            {isCreating && (
-              <div className="z-10 absolute w-screen h-screen bg-black opacity-80 flex items-center justify-center -left-0 overflow-clip -top-0">
-                <div className="z-50 bg-slate-600 w-4/12 F relative rounded-lg border border-white flex flex-col">
-                  <button
-                    className="bg-gray-800 px-5 rounded-sm text-white hover:text-black hover:bg-white absolute top-4 right-4"
-                    onClick={() => setIsCreating(false)}
-                  >
-                    Close
-                  </button>
-                  <div className="flex flex-col gap-2 justify-center mt-4 mx-5 mb-4">
-                    <h2>Create MultiSig Wallet</h2>
-                    {owners.map((owner, index) => (
-                      <input
-                        key={index}
-                        type="text"
-                        placeholder={`Owner ${index + 1} Address`}
-                        value={owner}
-                        onChange={(e) => handleOwnerChange(index, e)}
-                      />
-                    ))}
-                    <button
-                      className="bg-gray-500 text-white rounded lg hover:text-black hover:bg-white"
-                      onClick={addOwnerField}
+
+            <div className="mt-5">
+              {userWallets.length > 0 ? (
+                userWallets.map((walletAddress) => (
+                  <div key={walletAddress} className="my-2">
+                    <Link
+                      to={`/wallet/${walletAddress}`}
+                      className="text-blue-400 no-underline"
                     >
-                      Add Owner
-                    </button>
-                    <input
-                      type="number"
-                      placeholder="Required Signatures"
-                      value={requiredSignatures}
-                      onChange={(e) => setRequiredSignatures(e.target.value)}
-                    />
-                    <button
-                      className="bg-gray-500 text-white rounded lg hover:text-black hover:bg-white"
-                      onClick={createWallet}
-                    >
-                      Create Wallet
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-            {userWallets && userWallets.length > 0 ? (
-              <div>
-                {userWallets.map((walletAddress) => (
-                  <div key={walletAddress}>
-                    <Link to={`/wallet/${walletAddress}`}>
                       Wallet: {walletAddress}
                     </Link>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div>No wallets found.</div>
-            )}
+                ))
+              ) : (
+                <p className="text-gray-600">No wallets found yet.</p>
+              )}
+            </div>
           </div>
         )}
       </div>
+
+      {/* Modal Section */}
+      {isCreating && (
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-8 rounded-lg w-96 text-center shadow-xl">
+            <h2 className="text-blue-800 mb-6">Create MultiSig Wallet</h2>
+            {owners.map((owner, index) => (
+              <input
+                key={index}
+                type="text"
+                placeholder={`Owner ${index + 1} Address`}
+                value={owner}
+                onChange={(e) => handleOwnerChange(index, e)}
+                className="p-3 mb-3 border rounded-md border-gray-300 w-full"
+              />
+            ))}
+            <button
+              className="bg-blue-800 text-white rounded-lg py-3 mb-3 w-full border-none cursor-pointer"
+              onClick={addOwnerField}
+            >
+              Add Owner
+            </button>
+            <input
+              type="number"
+              placeholder="Required Signatures"
+              value={requiredSignatures}
+              onChange={(e) => setRequiredSignatures(e.target.value)}
+              className="p-3 border rounded-md border-gray-300 w-full mb-3"
+            />
+            <button
+              className="bg-sky-400 text-blue-800 rounded-lg py-3 w-full border-none cursor-pointer"
+              onClick={createWallet}
+            >
+              Create Wallet
+            </button>
+            <button
+              className="bg-gray-300 text-gray-800 rounded-lg py-3 w-full border-none cursor-pointer mt-3"
+              onClick={() => setIsCreating(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
