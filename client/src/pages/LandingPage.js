@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import { ethers } from "ethers";
 import { Link } from "react-router-dom";
+import { dummyData } from "../constant"; // Importing dummy data
 
 const LandingPage = () => {
-  const [userWallets, setUserWallets] = useState([]);
+  const [userWallets, setUserWallets] = useState(dummyData.walletAddresses); // Using the dummy wallet addresses
   const [currentAddress, setCurrentAddress] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [owners, setOwners] = useState([""]);
-  const [requiredSignatures, setRequiredSignatures] = useState(1);
+  const [owners, setOwners] = useState(dummyData.owners); // Using the dummy owners
+  const [requiredSignatures, setRequiredSignatures] = useState(
+    dummyData.requiredSignatures
+  ); // Using the dummy number of required signatures
 
   const handleOwnerChange = (index, event) => {
     const newOwners = [...owners];
@@ -29,6 +32,8 @@ const LandingPage = () => {
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
+        // Requesting wallet access from the user
+        await window.ethereum.request({ method: "eth_requestAccounts" });
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
         const address = await signer.getAddress();
@@ -45,102 +50,47 @@ const LandingPage = () => {
   };
 
   return (
-    <div
-      style={{
-        fontFamily: "'Poppins', sans-serif",
-        background: "linear-gradient(to bottom, #ffffff, #87ceeb)",
-        minHeight: "100vh",
-        color: "#333",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
-      }}
-    >
+    <div className="font-sans bg-gradient-to-b from-white to-sky-400 min-h-screen flex flex-col items-center justify-center p-5">
       {/* Header Section */}
-      <h1
-        style={{
-          fontSize: "3.5rem",
-          fontWeight: "bold",
-          color: "#004aad",
-          textAlign: "center",
-          marginBottom: "30px",
-        }}
-      >
+      <h1 className="text-5xl font-bold text-blue-800 text-center mb-8">
         MultiSig Wallet Platform
       </h1>
-      <p
-        style={{
-          fontSize: "1.3rem",
-          color: "#333",
-          textAlign: "center",
-          marginBottom: "25px",
-        }}
-      >
+      <p className="text-xl text-gray-800 text-center mb-6">
         Secure. Reliable. Advanced Technology.
       </p>
 
       {/* Wallet Connection Section */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "15px",
-        }}
-      >
+      <div className="flex flex-col items-center gap-4">
         {!currentAddress ? (
           <button
-            style={{
-              backgroundColor: "#004aad",
-              color: "#fff",
-              borderRadius: "8px",
-              padding: "12px 24px",
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-              border: "none",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-            }}
+            className="bg-blue-800 text-white rounded-lg py-3 px-6 text-xl font-bold border-none cursor-pointer transition-all duration-300 ease-in-out"
             onClick={connectWallet}
           >
             Connect to Wallet
           </button>
         ) : (
-          <div style={{ textAlign: "center" }}>
+          <div className="text-center">
             <button
-              style={{
-                backgroundColor: "#87ceeb",
-                color: "#004aad",
-                borderRadius: "8px",
-                padding: "12px 24px",
-                fontSize: "1.2rem",
-                fontWeight: "bold",
-                border: "none",
-                cursor: "pointer",
-                marginBottom: "20px",
-                transition: "transform 0.3s ease",
-              }}
+              className="bg-sky-400 text-blue-800 rounded-lg py-3 px-6 text-xl font-bold border-none cursor-pointer mb-5 transition-transform duration-300 ease-in-out"
               onClick={() => setIsCreating(true)}
             >
               Create New Wallet
             </button>
 
-            <div style={{ marginTop: "20px" }}>
+            <div className="mt-5">
               {userWallets.length > 0 ? (
                 userWallets.map((walletAddress) => (
-                  <div key={walletAddress} style={{ margin: "10px 0" }}>
+                  <div key={walletAddress} className="my-2">
                     <Link
                       to={`/wallet/${walletAddress}`}
-                      style={{ color: "#fdda44", textDecoration: "none" }}
+                      className="text-blue-400 no-underline"
                     >
                       Wallet: {walletAddress}
                     </Link>
                   </div>
                 ))
               ) : (
-                <p style={{ color: "#666" }}>No wallets found yet.</p>
+                <p className="text-gray-600">No wallets found yet.</p>
               )}
             </div>
           </div>
@@ -149,33 +99,9 @@ const LandingPage = () => {
 
       {/* Modal Section */}
       {isCreating && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              padding: "30px",
-              borderRadius: "10px",
-              width: "400px",
-              textAlign: "center",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
-            }}
-          >
-            <h2 style={{ color: "#004aad", marginBottom: "20px" }}>
-              Create MultiSig Wallet
-            </h2>
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-8 rounded-lg w-96 text-center shadow-xl">
+            <h2 className="text-blue-800 mb-6">Create MultiSig Wallet</h2>
             {owners.map((owner, index) => (
               <input
                 key={index}
@@ -183,26 +109,11 @@ const LandingPage = () => {
                 placeholder={`Owner ${index + 1} Address`}
                 value={owner}
                 onChange={(e) => handleOwnerChange(index, e)}
-                style={{
-                  padding: "10px",
-                  marginBottom: "10px",
-                  borderRadius: "5px",
-                  border: "1px solid #ccc",
-                  width: "100%",
-                }}
+                className="p-3 mb-3 border rounded-md border-gray-300 w-full"
               />
             ))}
             <button
-              style={{
-                backgroundColor: "#004aad",
-                color: "#fff",
-                borderRadius: "8px",
-                padding: "10px",
-                marginBottom: "10px",
-                border: "none",
-                cursor: "pointer",
-                width: "100%",
-              }}
+              className="bg-blue-800 text-white rounded-lg py-3 mb-3 w-full border-none cursor-pointer"
               onClick={addOwnerField}
             >
               Add Owner
@@ -212,39 +123,16 @@ const LandingPage = () => {
               placeholder="Required Signatures"
               value={requiredSignatures}
               onChange={(e) => setRequiredSignatures(e.target.value)}
-              style={{
-                padding: "10px",
-                borderRadius: "5px",
-                border: "1px solid #ccc",
-                width: "100%",
-                marginBottom: "10px",
-              }}
+              className="p-3 border rounded-md border-gray-300 w-full mb-3"
             />
             <button
-              style={{
-                backgroundColor: "#87ceeb",
-                color: "#004aad",
-                borderRadius: "8px",
-                padding: "10px",
-                border: "none",
-                cursor: "pointer",
-                width: "100%",
-              }}
+              className="bg-sky-400 text-blue-800 rounded-lg py-3 w-full border-none cursor-pointer"
               onClick={createWallet}
             >
               Create Wallet
             </button>
             <button
-              style={{
-                backgroundColor: "#ccc",
-                color: "#333",
-                borderRadius: "8px",
-                padding: "10px",
-                border: "none",
-                cursor: "pointer",
-                width: "100%",
-                marginTop: "10px",
-              }}
+              className="bg-gray-300 text-gray-800 rounded-lg py-3 w-full border-none cursor-pointer mt-3"
               onClick={() => setIsCreating(false)}
             >
               Cancel
