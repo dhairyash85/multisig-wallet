@@ -4,9 +4,10 @@ import { Link } from "react-router-dom";
 import { dummy } from "../constant";
 import { Plus } from "lucide-react";
 import { useWallet } from "../Context/WalletContext";
+import Background from "../component/Background";
 
 const LandingPage = () => {
-  const {walletAddress, connectWallet}=useWallet()
+  const { walletAddress, connectWallet } = useWallet()
   const [userWallets, setUserWallets] = useState([]);
 
   const [isCreating, setIsCreating] = useState(false);
@@ -19,8 +20,8 @@ const LandingPage = () => {
     newOwners[index] = event.target.value;
     setOwners(newOwners);
   };
-  useEffect(()=>{
-    if(walletAddress){
+  useEffect(() => {
+    if (walletAddress) {
       setUserWallets(Object.keys(dummy))
     }
   }, [walletAddress])
@@ -33,92 +34,91 @@ const LandingPage = () => {
       alert("Connect your wallet first!");
       return;
     }
-    setUserWallets(prev=>[...prev, walletAddress])
+    setUserWallets(prev => [...prev, walletAddress])
   };
+
 
 
   return (
     <div>
-      <div className="relative h-full min-h-[600px] bg-[#FF90F4] overflow-hidden rounded-[40px] mx-16  ">
+      {/*  <div className="relative h-full min-h-[600px] bg-[#FF90F4] overflow-hidden rounded-[40px] mx-16  ">
         <div className="absolute inset-0 bg-gradient-to-br from-[#FF90F4] to-[#7FFFD4]">
           <div className="absolute inset-0 flex justify-center items-center">
-            <div className="text-center">
-              <h1 className="text-5xl font-bold">MultiSig Wallet</h1>
-              {!walletAddress ? (
+            <div className="text-center"> */}
+          <Background className={"relative mt-16"}>
+        <h1 className="text-5xl font-bold">MultiSig Wallet</h1>
+        {!walletAddress ? (
+          <button
+            className="bg-black text-white font-bold py-3 px-6 rounded-lg mt-4 hover:scale-105 transition-transform"
+            onClick={connectWallet}
+          >
+            Connect to Wallet
+          </button>
+        ) : (
+          <div className="mt-4">
+            <button
+              className="bg-gray-800 text-white text-2xl px-6 py-2 rounded-lg hover:bg-gray-700"
+              onClick={() => setIsCreating(true)}
+            >
+              Create Wallet
+            </button>
+
+          </div>
+        )}
+
+        {/* Modal */}
+        {isCreating && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+              <div className=" flex justify-end ">
                 <button
-                  className="bg-black text-white font-bold py-3 px-6 rounded-lg mt-4 hover:scale-105 transition-transform"
-                  onClick={connectWallet}
+                  className="  text-gray-500 hover:text-black"
+                  onClick={() => setIsCreating(false)}
                 >
-                  Connect to Wallet
+                  <Plus className=" rotate-45" />
                 </button>
-              ) : (
-                <div className="mt-4">
-                  <button
-                    className="bg-gray-800 text-white text-2xl px-6 py-2 rounded-lg hover:bg-gray-700"
-                    onClick={() => setIsCreating(true)}
-                  >
-                    Create Wallet
-                  </button>
 
-                </div>
-              )}
+              </div>
 
-              {/* Modal */}
-              {isCreating && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-                  <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-                    <div className=" flex justify-end ">
-                      <button
-                        className="  text-gray-500 hover:text-black"
-                        onClick={() => setIsCreating(false)}
-                      >
-                        <Plus className=" rotate-45" />
-                      </button>
-
-                    </div>
-
-                    <h2 className="text-xl font-bold mb-4">
-                      Create MultiSig Wallet
-                    </h2>
-                    {owners.map((owner, index) => (
-                      <input
-                        key={index}
-                        type="text"
-                        placeholder={`Owner ${index + 1} Address`}
-                        value={owner}
-                        onChange={(e) => handleOwnerChange(index, e)}
-                        className="border rounded-lg p-2 w-full mb-2"
-                      />
-                    ))}
-                    <button
-                      className="bg-black text-white px-4 py-2 rounded-md mb-4 w-full "
-                      onClick={addOwnerField}
-                    >
-                      Add Owner
-                    </button>
-                    <input
-                      type="number"
-                      placeholder="Required Signatures"
-                      value={requiredSignatures}
-                      onChange={(e) =>
-                        setRequiredSignatures(Number(e.target.value))
-                      }
-                      className="border rounded-lg p-2 w-full mb-4"
-                    />
-                    <button
-                      className="bg-black text-white px-4 py-2 rounded-md w-full "
-                      onClick={createWallet}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Creating..." : "Create Wallet"}
-                    </button>
-                  </div>
-                </div>
-              )}
+              <h2 className="text-xl font-bold mb-4">
+                Create MultiSig Wallet
+              </h2>
+              {owners.map((owner, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  placeholder={`Owner ${index + 1} Address`}
+                  value={owner}
+                  onChange={(e) => handleOwnerChange(index, e)}
+                  className="border rounded-lg p-2 w-full mb-2"
+                />
+              ))}
+              <button
+                className="bg-black text-white px-4 py-2 rounded-md mb-4 w-full "
+                onClick={addOwnerField}
+              >
+                Add Owner
+              </button>
+              <input
+                type="number"
+                placeholder="Required Signatures"
+                value={requiredSignatures}
+                onChange={(e) =>
+                  setRequiredSignatures(Number(e.target.value))
+                }
+                className="border rounded-lg p-2 w-full mb-4"
+              />
+              <button
+                className="bg-black text-white px-4 py-2 rounded-md w-full "
+                onClick={createWallet}
+                disabled={isLoading}
+              >
+                {isLoading ? "Creating..." : "Create Wallet"}
+              </button>
             </div>
           </div>
-        </div>
-      </div>
+        )}
+      </Background>
 
       {/* wallet  */}
       <div>
