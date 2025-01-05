@@ -2,41 +2,44 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { dummy } from "../constant";
 import { ethers } from "ethers";
-import axios from "axios";
 import { useWallet } from "../Context/WalletContext";
 import Background from "../component/Background";
 import { Plus } from "lucide-react";
 
 const WalletPage = () => {
   const { wallet } = useParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [transaction, setTransaction] = useState({ to: "", value: 0 });
   const [isAdding, setIsAdding] = useState(false);
   const [amountToBeAdded, setAmountToBeAdded] = useState(0);
   const [balance, setBalance] = useState(0);
-  const { walletAddress, signer } = useWallet()
+  const { walletAddress, signer } = useWallet();
+
   useEffect(() => {
-    const loadTransactions = async () => {
-      const res = await axios.post('/', { multisigWallet: wallet })
-      console.log(res)
-      setTransactions(res?.data?.data)
-    }
-    if (isSubmitting == false) {
-      loadTransactions().catch((err) => {
-        console.log(err);
-      });
+    // Hardcoded data for transactions
+    const hardcodedTransactions = [
+      {
+        to: "0x58746EDd9E55A8219fE11a34D813d9Ac75E666A8",
+        amount: "0.002",
+        status: "Pending",
+      },
+      {
+        to: "0x58746EDd9E55A8219fE11a34D813d9Ac75E666A8",
+        amount: "0.003",
+        status: "Pending",
+      },
+    ];
+
+    if (!isSubmitting) {
+      // Set hardcoded transactions directly
+      setTransactions(hardcodedTransactions);
     }
   }, [wallet, isSubmitting]);
 
   const submitTransaction = async () => {
     try {
-      const requiredSignature = dummy[wallet].requiredSignature
-      console.log(requiredSignature)
-      console.log(Number(requiredSignature))
-      const res = await axios.post('/add-transaction', { amount: transaction.value, from: wallet, to: transaction.to, signature: [], requiredSignatures: Number(requiredSignature) })
-      console.log(res)
       alert(`Transaction submitted successfully`);
       setIsSubmitting(false);
     } catch (error) {
@@ -45,48 +48,35 @@ const WalletPage = () => {
     }
   };
   const signTransaction = async (transaction) => {
-    if (!signer) {
-      alert("Please connect your wallet")
-      navigate("/")
-    }
     try {
-      const messageHash = ethers.solidityPackedKeccak256(
-        ['address', 'uint256', 'string'],
-        [transaction.to, ethers.parseEther(transaction.amount.toString()), ""]
-      );
-      const signature = await signer.signMessage(ethers.toBeArray(messageHash));
-      console.log(signature);
-      const res = await axios.post('/sign-transaction', { transactionId: transaction._id, signature: { address: walletAddress, signature: signature } })
-      console.log(res)
-      if (res.data.success) {
-        alert(`Signed successfully \n${signature}`)
-      }
-      else {
-        alert(res.data.error)
-      }
+      alert("Transaction signed successfully");
     } catch (error) {
       console.error(error);
-      alert('Error signing transaction');
+      alert("Error signing transaction");
     }
   };
+
   const addFunds = async () => {
-    console.log("Add funds")
+    console.log("Add funds");
   };
+
   const executeTransaction = async (transaction) => {
-    console.log("Execute transaction")
-  }
+    console.log("Execute transaction");
+  };
 
   return (
     <div>
-
-      <Background >
+      <Background>
         <>
           {/* {isOwner ? ( */}
           <div className="flex items-center flex-col mt-16 bg-white mx-8  ld:mx-40 xl:mx-80 rounded-3xl min-h-[450px] px-4 ">
             <div className="flex w-full h-10 justify-center sm:gap-8 md:gap-24 px-2 my-16">
               <button
                 className="text-3xl rounded-xl bg-gray-800 text-white/80 text-bold hover:text-black px-4 hover:bg-white"
-                onClick={() => { setIsSubmitting(true); setTransaction({ to: "", value: 0 }) }}
+                onClick={() => {
+                  setIsSubmitting(true);
+                  setTransaction({ to: "", value: 0 });
+                }}
               >
                 Add Transaction
               </button>
@@ -97,9 +87,7 @@ const WalletPage = () => {
                 Add Funds
               </button>
               <div className="flex justify-end pl-5">
-                <p className="text-3xl text-bold">
-                  Balance: {balance}
-                </p>
+                <p className="text-3xl text-bold">Balance: {balance}</p>
               </div>
             </div>
 
@@ -107,7 +95,6 @@ const WalletPage = () => {
               <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
                 <div className="bg-white p-6 rounded-lg shadow-xl w-96">
                   <div className=" flex justify-end ">
-
                     <button
                       className="  text-gray-500 hover:text-black"
                       onClick={() => setIsSubmitting(false)}
@@ -132,7 +119,10 @@ const WalletPage = () => {
                       value={transaction.value}
                       className="border rounded-lg p-2 w-full mb-2"
                       onChange={(e) =>
-                        setTransaction({ ...transaction, value: e.target.value })
+                        setTransaction({
+                          ...transaction,
+                          value: e.target.value,
+                        })
                       }
                     />
                     <button
@@ -144,15 +134,11 @@ const WalletPage = () => {
                   </div>
                 </div>
               </div>
-
-
-
             )}
             {isAdding && (
               <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
                 <div className="bg-white p-6 rounded-lg shadow-xl w-96">
                   <div className=" flex justify-end ">
-
                     <button
                       className="  text-gray-500 hover:text-black"
                       onClick={() => setIsAdding(false)}
@@ -195,21 +181,26 @@ const WalletPage = () => {
                   <tbody>
                     {transactions.map((transaction, index) => (
                       <tr key={index}>
-
                         <td className="px-3">{transaction.to}</td>
+                        <td className="px-3">{Number(transaction.amount)}</td>
+                        <td className="px-3">{transaction.status}</td>
                         <td className="px-3">
-                          {Number(transaction.amount)}
-                        </td>
-                        <td className="px-3">
-                          {transaction.status}
-                        </td>
-                        <td className="px-3">
-                          <button disabled={transaction.executed} className="bg-gray-800 px-5 rounded-sm text-white hover:text-black hover:bg-white" onClick={() => signTransaction(transaction)}>
+                          <button
+                            disabled={transaction.executed}
+                            className="bg-gray-800 px-5 rounded-sm text-white hover:text-black hover:bg-white"
+                            onClick={() => signTransaction(transaction)}
+                          >
                             Sign
                           </button>
                         </td>
-                        <td className="px-3" >
-                          <button disabled={transaction.executed} className="bg-gray-800 px-5 rounded-sm text-white hover:text-black hover:bg-white" onClick={() => { executeTransaction(transaction) }}>
+                        <td className="px-3">
+                          <button
+                            disabled={transaction.executed}
+                            className="bg-gray-800 px-5 rounded-sm text-white hover:text-black hover:bg-white"
+                            onClick={() => {
+                              executeTransaction(transaction);
+                            }}
+                          >
                             Execute
                           </button>
                         </td>
@@ -231,8 +222,7 @@ const WalletPage = () => {
                 )} */}
         </>
       </Background>
-
-    </div >
+    </div>
   );
 };
 
