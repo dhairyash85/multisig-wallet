@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { dummy } from "../constant";
+import { dummy, walletABI } from "../constant";
 import { ethers } from "ethers";
 import { useWallet } from "../Context/WalletContext";
 import Background from "../component/Background";
 import { Plus } from "lucide-react";
-
+import axiosInstance from "../Services/axios"
 const WalletPage = () => {
   const { wallet } = useParams();
   const navigate = useNavigate();
@@ -15,55 +15,103 @@ const WalletPage = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [amountToBeAdded, setAmountToBeAdded] = useState(0);
   const [balance, setBalance] = useState(0);
-  const { walletAddress, signer } = useWallet();
-
+  const { walletAddress, signer, provider, connectWallet } = useWallet();
+  const [walletContract, setWalletContract]=useState(null);
   useEffect(() => {
     // Hardcoded data for transactions
-    const hardcodedTransactions = [
-      {
-        to: "0x58746EDd9E55A8219fE11a34D813d9Ac75E666A8",
-        amount: "0.002",
-        status: "Pending",
-      },
-      {
-        to: "0x58746EDd9E55A8219fE11a34D813d9Ac75E666A8",
-        amount: "0.003",
-        status: "Pending",
-      },
-    ];
-
-    if (!isSubmitting) {
-      // Set hardcoded transactions directly
-      setTransactions(hardcodedTransactions);
+    if(!wallet){
+      return
     }
-  }, [wallet, isSubmitting]);
-
+    const loadTransaction=async()=>{
+      const res=await axiosInstance.post("/", {multiSigWallet: wallet});
+      setTransactions(res?.data?.transactions);
+    }
+    const fetchBalance=async()=>{
+      if(!walletContract || !provider) return;
+      const bal=await provider.getBalance(wallet);
+      const req=await walletContract.getRequiredSignatures();
+      setBalance(ethers.formatEther(bal));
+    }
+    fetchBalance()
+    if (!isSubmitting && wallet) {
+      loadTransaction()
+    }
+  }, [wallet, isSubmitting, walletContract]);
+  useEffect(()=>{
+    if(!wallet || !signer){
+      connectWallet()
+    }
+    const contract=new ethers.Contract(wallet, walletABI, signer);
+    setWalletContract(contract)
+  }, [wallet, signer])
   const submitTransaction = async () => {
+    if(!walletContract){
+      return alert("Contract not initialized yet")
+    }
     try {
-      alert(`Transaction submitted successfully`);
+      const requiredSignatures=await walletContract.getRequiredSignatures()
+      const res=await axiosInstance.post("/add-transaction", {amount:transaction.value, from: wallet, to: transaction.to, signature:[], requiredSignatures:Number(requiredSignatures)})
+      if(res.success){
+
+        alert(`Transaction submitted successfully`);
+      }
       setIsSubmitting(false);
     } catch (error) {
-      console.error(error);
+      console.log(error);
       alert("Error submitting transaction");
     }
   };
   const signTransaction = async (transaction) => {
     try {
+      const messageHash=ethers.solidityPackedKeccak256(['address', 'uint256', 'string'], 
+        [transaction.to, ethers.parseEther(transaction.amount.toString()), ""]
+      )
+      const signature=await signer.signMessage(ethers.toBeArray(messageHash));
+      const res=await axiosInstance.post("sign-transaction",{signature:{address:walletAddress, signature}, transactionId: transaction._id})
       alert("Transaction signed successfully");
     } catch (error) {
-      console.error(error);
+      console.log(error);
       alert("Error signing transaction");
     }
   };
 
   const addFunds = async () => {
-    console.log("Add funds");
+    if (isNaN(amountToBeAdded) || amountToBeAdded <= 0) {
+      return alert("Amount must be more than 0");
+    }
+    if (!walletContract) {
+      return alert("Contract not initialized yet");
+    }
+    try {
+      const tx = await walletContract.fundme({
+        value: ethers.parseUnits(amountToBeAdded.toString(), "ether"),
+      });  
+      alert("Transaction sent, waiting for confirmation...");
+      await tx.wait(); // Wait for transaction to be mined
+  
+      alert("Funds added");
+    } catch (err) {
+      console.log(err);
+      alert("An error occurred while adding funds");
+    }
   };
+  
 
   const executeTransaction = async (transaction) => {
-    console.log("Execute transaction");
+    try{
+      if(!walletContract){
+        return alert("Contract not initialized yet");
+      }
+      const signatures=transaction.signatures.map(sign=>sign.signature);
+      const tx=await walletContract.executeTransaction(transaction.to, ethers.parseEther(transaction.amount.toString()), signatures) 
+      await tx.wait();
+      const res=await axiosInstance.post("/execute-transaction", {txHash:tx.data, transactionId: transaction._id})
+      alert("Execute transaction");
+    }catch(err){
+      console.log(err);
+      alert("Execution failed")
+    }
   };
-
   return (
     <div>
       <Background>
@@ -174,6 +222,7 @@ const WalletPage = () => {
                       <th className="px-3">To</th>
                       <th className="px-3">Amount</th>
                       <th className="px-3">Executed</th>
+                      <th className="px-3">Signatures</th>
                       <th className="px-3">Sign</th>
                       <th className="px-3">Execute</th>
                     </tr>
@@ -183,7 +232,8 @@ const WalletPage = () => {
                       <tr key={index}>
                         <td className="px-3">{transaction.to}</td>
                         <td className="px-3">{Number(transaction.amount)}</td>
-                        <td className="px-3">{transaction.status}</td>
+                        <td className="px-3">{transaction.executed?"Executed":"Pending"}</td>
+                        <td className="px-3">{transaction.signatures?.length}</td>
                         <td className="px-3">
                           <button
                             disabled={transaction.executed}

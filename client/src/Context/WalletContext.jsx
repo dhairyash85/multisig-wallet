@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { ethers } from 'ethers';
-
+import {factoryABI, factoryAddress } from '../constant';
 const WalletContext = createContext();
 
 export const WalletProvider = ({ children }) => {
@@ -8,6 +8,7 @@ export const WalletProvider = ({ children }) => {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
 
+  const [factoryContract, setFactoryContract]=useState(null);
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
@@ -17,6 +18,9 @@ export const WalletProvider = ({ children }) => {
         setProvider(providerInstance);
         setSigner(signerInstance);
         setWalletAddress(walletAddress);
+        const factory=new ethers.Contract(factoryAddress, factoryABI, signerInstance);
+        console.log(factory)
+        setFactoryContract(factory);
       } catch (error) {
         console.error('Failed to connect wallet:', error);
       }
@@ -45,7 +49,7 @@ export const WalletProvider = ({ children }) => {
 
   return (
     <WalletContext.Provider
-      value={{ walletAddress, connectWallet, provider, signer }}
+      value={{ walletAddress, connectWallet, provider, signer, factoryContract }}
     >
       {children}
     </WalletContext.Provider>

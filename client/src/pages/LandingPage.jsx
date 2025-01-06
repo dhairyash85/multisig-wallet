@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { Link } from "react-router-dom";
-import { dummy } from "../constant";
+import { dummy, walletABI } from "../constant";
 import { Plus } from "lucide-react";
 import { useWallet } from "../Context/WalletContext";
 import Background from "../component/Background";
 
 const LandingPage = () => {
-  const { walletAddress, connectWallet } = useWallet()
+  const { walletAddress, connectWallet, factoryContract } = useWallet()
   const [userWallets, setUserWallets] = useState([]);
 
   const [isCreating, setIsCreating] = useState(false);
@@ -21,22 +21,37 @@ const LandingPage = () => {
     setOwners(newOwners);
   };
   useEffect(() => {
-    if (walletAddress) {
-      setUserWallets(Object.keys(dummy))
+    const fetchWallets=async()=>{
+      if(walletAddress && factoryContract){
+        const wallets = await factoryContract.getWallets(walletAddress);
+        setUserWallets(wallets)
+      }
     }
-  }, [walletAddress])
+    fetchWallets()
+  }, [walletAddress, factoryContract])
   const addOwnerField = () => {
     setOwners([...owners, ""]);
   };
 
   const createWallet = async () => {
-    if (!walletAddress) {
+    if (!walletAddress || !factoryContract) {
       alert("Connect your wallet first!");
       return;
     }
-    setUserWallets(prev => [...prev, walletAddress])
-  };
+    try{
 
+      const initData = new ethers.Interface(walletABI).encodeFunctionData(
+        "initialize",
+        [owners, requiredSignatures]
+      );
+      const tx=await factoryContract.deployContract(initData, owners);
+      await tx.wait();
+      alert("Created")
+    }catch(err){
+      console.log(err)
+      alert("Wallet not created");
+    }
+  };
 
 
   return (
