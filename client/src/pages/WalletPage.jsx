@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import { useWallet } from "../Context/WalletContext";
 import Background from "../component/Background";
 import { Plus } from "lucide-react";
+import Button from "../component/Button";
 
 const WalletPage = () => {
   const { wallet } = useParams();
@@ -71,21 +72,21 @@ const WalletPage = () => {
           {/* {isOwner ? ( */}
           <div className="flex items-center flex-col mt-16 bg-white mx-8  ld:mx-40 xl:mx-80 rounded-3xl min-h-[450px] px-4 ">
             <div className="flex w-full h-10 justify-center sm:gap-8 md:gap-24 px-2 my-16">
-              <button
-                className="text-3xl rounded-xl bg-gray-800 text-white/80 text-bold hover:text-black px-4 hover:bg-white"
+              <Button
                 onClick={() => {
                   setIsSubmitting(true);
                   setTransaction({ to: "", value: 0 });
                 }}
               >
                 Add Transaction
-              </button>
-              <button
-                className="text-3xl rounded-xl bg-gray-800 text-white text-bold hover:text-black px-4 hover:bg-white"
-                onClick={() => setIsAdding(true)}
+              </Button>
+              <Button
+              onClick={() => setIsAdding(true)}
               >
                 Add Funds
-              </button>
+
+              </Button>
+            
               <div className="flex justify-end pl-5">
                 <p className="text-3xl text-bold">Balance: {balance}</p>
               </div>

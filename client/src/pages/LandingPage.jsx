@@ -5,6 +5,7 @@ import { dummy } from "../constant";
 import { Plus } from "lucide-react";
 import { useWallet } from "../Context/WalletContext";
 import Background from "../component/Background";
+import Button from "../component/Button";
 
 const LandingPage = () => {
   const { walletAddress, connectWallet } = useWallet()
@@ -45,23 +46,26 @@ const LandingPage = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-[#FF90F4] to-[#7FFFD4]">
           <div className="absolute inset-0 flex justify-center items-center">
             <div className="text-center"> */}
-          <Background className={"relative mt-16"}>
+      <Background className={"relative mt-16"}>
         <h1 className="text-5xl font-bold">MultiSig Wallet</h1>
         {!walletAddress ? (
-          <button
-            className="bg-black text-white font-bold py-3 px-6 rounded-lg mt-4 hover:scale-105 transition-transform"
+
+          <Button
             onClick={connectWallet}
           >
             Connect to Wallet
-          </button>
+
+          </Button>
         ) : (
           <div className="mt-4">
-            <button
-              className="bg-gray-800 text-white text-2xl px-6 py-2 rounded-lg hover:bg-gray-700"
+
+            <Button
+              className={' hover:bg-gray-700 '}
               onClick={() => setIsCreating(true)}
             >
               Create Wallet
-            </button>
+
+            </Button>
 
           </div>
         )}
@@ -93,12 +97,14 @@ const LandingPage = () => {
                   className="border rounded-lg p-2 w-full mb-2"
                 />
               ))}
-              <button
-                className="bg-black text-white px-4 py-2 rounded-md mb-4 w-full "
+              <Button
                 onClick={addOwnerField}
-              >
+                className={"w-full "}
+                >
                 Add Owner
-              </button>
+
+              </Button>
+              
               <input
                 type="number"
                 placeholder="Required Signatures"
