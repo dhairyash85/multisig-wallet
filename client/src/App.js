@@ -1,18 +1,12 @@
-import React, { useState } from 'react';
-import { BrowserRouter, Route, Routes, Link } from 'react-router-dom';
-import LandingPage from './pages/LandingPage';
-import WalletPage from './pages/WalletPage';
-import { WalletProvider } from './Context/WalletContext';
+
 function App() {
   return (
-    <WalletProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path='/wallet/:wallet' element={<WalletPage/>}/>
-              <Route path='/' element={<LandingPage/>}/>
-            </Routes>          
-          </BrowserRouter>
-    </WalletProvider>
+    <div className=' flex flex-col justify-center mt-72 gap-5'>
+      <img src='/image.png' className=' rounded-full h-96 w-96 items-center flex justify-center mx-auto ' />
+      <h1 className='  flex justify-center  text-6xl font-bold'>ISTE- VESIT</h1>
+
+
+    </div>
   )
 }
 
