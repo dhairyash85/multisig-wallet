@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { ethers } from 'ethers';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { ethers } from "ethers";
 
 const WalletContext = createContext();
 
@@ -18,17 +18,16 @@ export const WalletProvider = ({ children }) => {
         setSigner(signerInstance);
         setWalletAddress(walletAddress);
       } catch (error) {
-        console.error('Failed to connect wallet:', error);
+        console.error("Failed to connect wallet:", error);
       }
     } else {
-      console.error('MetaMask is not installed');
+      console.error("MetaMask is not installed");
     }
   };
 
-
   useEffect(() => {
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts) => {
+      window.ethereum.on("accountsChanged", (accounts) => {
         if (accounts.length > 0) {
           setWalletAddress(accounts[0]);
         } else {
@@ -37,7 +36,7 @@ export const WalletProvider = ({ children }) => {
         }
       });
 
-      window.ethereum.on('chainChanged', () => {
+      window.ethereum.on("chainChanged", () => {
         window.location.reload();
       });
     }
