@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { dummy } from "../constant";
-import { ethers } from "ethers";
-import { useWallet } from "../Context/WalletContext";
 import Background from "../component/Background";
 import { Plus } from "lucide-react";
 import Button from "../component/Button";
@@ -16,7 +13,6 @@ const WalletPage = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [amountToBeAdded, setAmountToBeAdded] = useState(0);
   const [balance, setBalance] = useState(0);
-  const { walletAddress, signer } = useWallet();
 
   useEffect(() => {
     // Hardcoded data for transactions
@@ -80,17 +76,43 @@ const WalletPage = () => {
               >
                 Add Transaction
               </Button>
-              <Button
-              onClick={() => setIsAdding(true)}
-              >
-                Add Funds
+              <Button onClick={() => setIsAdding(true)}>Add Funds</Button>
 
-              </Button>
-            
               <div className="flex justify-end pl-5">
                 <p className="text-3xl text-bold">Balance: {balance}</p>
               </div>
             </div>
+
+            {isAdding && (
+              <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+                  <div className=" flex justify-end ">
+                    <button
+                      className="  text-gray-500 hover:text-black"
+                      onClick={() => setIsAdding(false)}
+                    >
+                      <Plus className=" rotate-45" />
+                    </button>
+                  </div>
+                  <div className="flex flex-col gap-2 items-center">
+                    <h2>Add Funds</h2>
+                    <input
+                      type="number"
+                      placeholder="Value (in ETH)"
+                      value={amountToBeAdded}
+                      className="border rounded-lg p-2 w-full mb-2"
+                      onChange={(e) => setAmountToBeAdded(e.target.value)}
+                    />
+                    <button
+                      className="bg-black text-white px-4 py-2 rounded-md w-full "
+                      onClick={addFunds}
+                    >
+                      Add Funds
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {isSubmitting && (
               <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
@@ -131,36 +153,6 @@ const WalletPage = () => {
                       onClick={submitTransaction}
                     >
                       Submit Transaction
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-            {isAdding && (
-              <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-                <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-                  <div className=" flex justify-end ">
-                    <button
-                      className="  text-gray-500 hover:text-black"
-                      onClick={() => setIsAdding(false)}
-                    >
-                      <Plus className=" rotate-45" />
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-2 items-center">
-                    <h2>Add Funds</h2>
-                    <input
-                      type="number"
-                      placeholder="Value (in ETH)"
-                      value={amountToBeAdded}
-                      className="border rounded-lg p-2 w-full mb-2"
-                      onChange={(e) => setAmountToBeAdded(e.target.value)}
-                    />
-                    <button
-                      className="bg-black text-white px-4 py-2 rounded-md w-full "
-                      onClick={addFunds}
-                    >
-                      Add Funds
                     </button>
                   </div>
                 </div>
@@ -216,11 +208,6 @@ const WalletPage = () => {
               </>
             )}
           </div>
-          {/* ) : (
-                  <>
-                    <h1 className=" text-center">You are not the owner of this wallet</h1>
-                  </>
-                )} */}
         </>
       </Background>
     </div>

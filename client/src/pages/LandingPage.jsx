@@ -8,7 +8,7 @@ import Background from "../component/Background";
 import Button from "../component/Button";
 
 const LandingPage = () => {
-  const { walletAddress, connectWallet } = useWallet()
+  const { walletAddress, connectWallet } = useWallet();
   const [userWallets, setUserWallets] = useState([]);
 
   const [isCreating, setIsCreating] = useState(false);
@@ -23,9 +23,9 @@ const LandingPage = () => {
   };
   useEffect(() => {
     if (walletAddress) {
-      setUserWallets(Object.keys(dummy))
+      setUserWallets(Object.keys(dummy));
     }
-  }, [walletAddress])
+  }, [walletAddress]);
   const addOwnerField = () => {
     setOwners([...owners, ""]);
   };
@@ -35,38 +35,23 @@ const LandingPage = () => {
       alert("Connect your wallet first!");
       return;
     }
-    setUserWallets(prev => [...prev, walletAddress])
+    setUserWallets((prev) => [...prev, walletAddress]);
   };
-
-
 
   return (
     <div>
-      {/*  <div className="relative h-full min-h-[600px] bg-[#FF90F4] overflow-hidden rounded-[40px] mx-16  ">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#FF90F4] to-[#7FFFD4]">
-          <div className="absolute inset-0 flex justify-center items-center">
-            <div className="text-center"> */}
       <Background className={"relative mt-16"}>
         <h1 className="text-5xl font-bold">MultiSig Wallet</h1>
         {!walletAddress ? (
-
-          <Button
-            onClick={connectWallet}
-          >
-            Connect to Wallet
-
-          </Button>
+          <Button onClick={connectWallet}>Connect to Wallet</Button>
         ) : (
           <div className="mt-4">
-
             <Button
-              className={' hover:bg-gray-700 '}
+              className={" hover:bg-gray-700 "}
               onClick={() => setIsCreating(true)}
             >
               Create Wallet
-
             </Button>
-
           </div>
         )}
 
@@ -81,12 +66,9 @@ const LandingPage = () => {
                 >
                   <Plus className=" rotate-45" />
                 </button>
-
               </div>
 
-              <h2 className="text-xl font-bold mb-4">
-                Create MultiSig Wallet
-              </h2>
+              <h2 className="text-xl font-bold mb-4">Create MultiSig Wallet</h2>
               {owners.map((owner, index) => (
                 <input
                   key={index}
@@ -97,21 +79,15 @@ const LandingPage = () => {
                   className="border rounded-lg p-2 w-full mb-2"
                 />
               ))}
-              <Button
-                onClick={addOwnerField}
-                className={"w-full "}
-                >
+              <Button onClick={addOwnerField} className={"w-full "}>
                 Add Owner
-
               </Button>
-              
+
               <input
                 type="number"
                 placeholder="Required Signatures"
                 value={requiredSignatures}
-                onChange={(e) =>
-                  setRequiredSignatures(Number(e.target.value))
-                }
+                onChange={(e) => setRequiredSignatures(Number(e.target.value))}
                 className="border rounded-lg p-2 w-full mb-4"
               />
               <button
@@ -128,7 +104,6 @@ const LandingPage = () => {
 
       {/* wallet  */}
       <div>
-
         <div className="mt-16 mx-32">
           {userWallets.length > 0 ? (
             <div className=" grid grid-cols-4 gap-6 items-center text-center overflow-auto p-4">
@@ -159,8 +134,6 @@ const LandingPage = () => {
           )}
         </div>
       </div>
-
-
     </div>
   );
 };
